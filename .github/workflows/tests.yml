@@ -3,170 +3,271 @@ name: Testing
 on: [push, pull_request]
 
 jobs:
+  matrix:
+    name: Generate Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: Generate test matrix
+        id: generate
+        run: |
+          # Test oldest and newest PHP per Laravel version, with both stability modes.
+          # Laravel 10: PHP ^8.1 → test 8.1, 8.4
+          # Laravel 11: PHP ^8.2 → test 8.2, 8.4
+          # Laravel 12: PHP ^8.2 → test 8.2, 8.4
+          # Laravel 13: PHP ^8.3 → test 8.3, 8.4
+          MATRIX='[
+            {"php":"8.1","laravel":"10.*","stability":"prefer-lowest"},
+            {"php":"8.1","laravel":"10.*","stability":"prefer-stable"},
+            {"php":"8.4","laravel":"10.*","stability":"prefer-lowest"},
+            {"php":"8.4","laravel":"10.*","stability":"prefer-stable"},
+            {"php":"8.2","laravel":"11.*","stability":"prefer-lowest"},
+            {"php":"8.2","laravel":"11.*","stability":"prefer-stable"},
+            {"php":"8.4","laravel":"11.*","stability":"prefer-lowest"},
+            {"php":"8.4","laravel":"11.*","stability":"prefer-stable"},
+            {"php":"8.2","laravel":"12.*","stability":"prefer-lowest"},
+            {"php":"8.2","laravel":"12.*","stability":"prefer-stable"},
+            {"php":"8.4","laravel":"12.*","stability":"prefer-lowest"},
+            {"php":"8.4","laravel":"12.*","stability":"prefer-stable"},
+            {"php":"8.3","laravel":"13.*","stability":"prefer-lowest"},
+            {"php":"8.3","laravel":"13.*","stability":"prefer-stable"},
+            {"php":"8.4","laravel":"13.*","stability":"prefer-lowest"},
+            {"php":"8.4","laravel":"13.*","stability":"prefer-stable"}
+          ]'
+          echo "matrix=$(echo "$MATRIX" | jq -c .)" >> "$GITHUB_OUTPUT"
+
   maria10_3:
     name: MariaDB 10.3
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.3
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_4:
     name: MariaDB 10.4
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.4
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_5:
     name: MariaDB 10.5
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.5
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_6:
     name: MariaDB 10.6
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.6
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_7:
     name: MariaDB 10.7
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.7
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_8:
     name: MariaDB 10.8
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.8
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_9:
     name: MariaDB 10.9
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: 10.9
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria10_10:
     name: MariaDB 10.10
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "10.10"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria11_0:
     name: MariaDB 11.0
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "11.0"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria11_1:
     name: MariaDB 11.1
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "11.1"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria11_2:
     name: MariaDB 11.2
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "11.2"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria11_3:
     name: MariaDB 11.3
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "11.3"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   maria11_4:
     name: MariaDB 11.2
+    needs: matrix
     uses: ./.github/workflows/tests-maria.yml
     with:
       version: "11.4"
+      matrix: ${{ needs.matrix.outputs.matrix }}
 
   mysql5_7:
     name: MySQL 5.7
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "5.7"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   mysql8_0:
     name: MySQL 8.0
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "8.0"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   mysql8_1:
     name: MySQL 8.1
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "8.1"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   mysql8_2:
     name: MySQL 8.2
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "8.2"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   mysql8_3:
     name: MySQL 8.3
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "8.3"
+      matrix: ${{ needs.matrix.outputs.matrix }}
   mysql8_4:
     name: MySQL 8.4
+    needs: matrix
     uses: ./.github/workflows/tests-mysql.yml
     with:
       version: "8.4"
+      matrix: ${{ needs.matrix.outputs.matrix }}
 
   pgsql10:
     name: PostgreSQL 10
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 10
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql11:
     name: PostgreSQL 11
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 11
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql12:
     name: PostgreSQL 12
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 12
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql13:
     name: PostgreSQL 13
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 13
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql14:
     name: PostgreSQL 14
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 14
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql15:
     name: PostgreSQL 15
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 15
+      matrix: ${{ needs.matrix.outputs.matrix }}
   pgsql16:
     name: PostgreSQL 16
+    needs: matrix
     uses: ./.github/workflows/tests-pgsql.yml
     with:
       version: 16
+      matrix: ${{ needs.matrix.outputs.matrix }}
 
   sqlite:
     name: SQLite
+    needs: matrix
     uses: ./.github/workflows/tests-sqlite.yml
+    with:
+      matrix: ${{ needs.matrix.outputs.matrix }}
 
   sqlsrv2017_ga:
     name: Microsoft SQL Server 2017 (GA)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2017-GA-ubuntu
+      matrix: ${{ needs.matrix.outputs.matrix }}
   sqlsrv2017_latest:
     name: Microsoft SQL Server 2017 (Latest)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2017-latest
+      matrix: ${{ needs.matrix.outputs.matrix }}
   sqlsrv2019_ga:
     name: Microsoft SQL Server 2019 (GA)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2019-GA-ubuntu-16.04
+      matrix: ${{ needs.matrix.outputs.matrix }}
   sqlsrv2019_latest:
     name: Microsoft SQL Server 2019 (Latest)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2019-latest
+      matrix: ${{ needs.matrix.outputs.matrix }}
   sqlsrv2022_ga:
     name: Microsoft SQL Server 2022 (GA)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2022-RTM-GDR1-ubuntu-20.04
+      matrix: ${{ needs.matrix.outputs.matrix }}
   sqlsrv2022_latest:
     name: Microsoft SQL Server 2022 (Latest)
+    needs: matrix
     uses: ./.github/workflows/tests-sqlsrv.yml
     with:
       version: 2022-latest
+      matrix: ${{ needs.matrix.outputs.matrix }}

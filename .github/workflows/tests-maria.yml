@@ -6,45 +6,44 @@ on:
       version:
         required: true
         type: string
+      matrix:
+        required: true
+        type: string
 
 jobs:
+  filter:
+    name: Filter Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.filter.outputs.matrix }}
+    steps:
+      - name: Filter incompatible combinations
+        id: filter
+        env:
+          MATRIX: ${{ inputs.matrix }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          IFS='.' read -r major minor <<< "$VERSION"
+          # Laravel 11.x requires MariaDB 10.10+
+          if [[ $major -eq 10 && $minor -lt 10 ]]; then
+            echo "matrix=$(echo "$MATRIX" | jq -c '[.[] | select(.laravel != "11.*")]')" >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=$(echo "$MATRIX" | jq -c .)" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    needs: filter
 
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        version: ["${{ inputs.version }}"]
-        php: [8.1, 8.2, 8.3, 8.4]
-        laravel: [10.*, 11.*, 12.*]
-        stability: [prefer-lowest, prefer-stable]
-        exclude:
-          # Laravel 12.x only supports PHP ^8.2
-          - laravel: 12.*
-            php: 8.1
-          # Laravel 11.x only supports PHP ^8.2
-          - laravel: 11.*
-            php: 8.1
-          # Laravel 11.x required MariaDB 10.10+
-          - laravel: 11.*
-            version: 10.3
-          - laravel: 11.*
-            version: 10.4
-          - laravel: 11.*
-            version: 10.5
-          - laravel: 11.*
-            version: 10.6
-          - laravel: 11.*
-            version: 10.7
-          - laravel: 11.*
-            version: 10.8
-          - laravel: 11.*
-            version: 10.9
+        include: ${{ fromJSON(needs.filter.outputs.matrix) }}
 
     services:
       database:
-        image: mariadb:${{ matrix.version }}
+        image: mariadb:${{ inputs.version }}
         options: --health-cmd="healthcheck.sh --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
@@ -53,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
